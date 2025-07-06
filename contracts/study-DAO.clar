@@ -98,6 +98,7 @@
 (define-public (join-group (group-id uint))
   (let ((group-data-opt (map-get? study-groups { group-id: group-id }))
         (current-time (increment-time)))
+    (asserts! (> group-id u0) err-invalid-input)
     (match group-data-opt
       group-data
       (begin
@@ -128,8 +129,10 @@
   (voting-duration uint))
   (let ((proposal-id (var-get next-proposal-id))
         (current-time (increment-time)))
+    (asserts! (> group-id u0) err-invalid-input)
     (asserts! (> voting-duration u0) err-invalid-input)
     (asserts! (> (len title) u0) err-invalid-input)
+    (asserts! (> (len description) u0) err-invalid-input)
     
     (match (map-get? group-members { group-id: group-id, member: tx-sender })
       member-data
@@ -155,6 +158,7 @@
 ;; Vote on a proposal
 (define-public (vote-on-proposal (proposal-id uint) (vote-for bool))
   (let ((current-time (var-get global-time)))
+    (asserts! (> proposal-id u0) err-invalid-input)
     (match (map-get? proposals { proposal-id: proposal-id })
       proposal-data
       (begin
@@ -182,7 +186,10 @@
 
 ;; Update contribution score (only group creator can do this)
 (define-public (update-contribution-score (group-id uint) (member principal) (new-score uint))
-  (match (map-get? study-groups { group-id: group-id })
+  (begin
+    (asserts! (> group-id u0) err-invalid-input)
+    (asserts! (> new-score u0) err-invalid-input)
+    (match (map-get? study-groups { group-id: group-id })
     group-data
     (begin
       (asserts! (is-eq tx-sender (get creator group-data)) err-unauthorized)
@@ -198,11 +205,13 @@
             }))
           (ok true))
         err-not-found))
-    err-not-found))
+    err-not-found)))
 
 ;; Leave a study group
 (define-public (leave-group (group-id uint))
-  (match (map-get? study-groups { group-id: group-id })
+  (begin
+    (asserts! (> group-id u0) err-invalid-input)
+    (match (map-get? study-groups { group-id: group-id })
     group-data
     (begin
       (asserts! (is-some (map-get? group-members { group-id: group-id, member: tx-sender })) err-not-found)
@@ -214,11 +223,13 @@
         (merge group-data { current-members: (- (get current-members group-data) u1) }))
       
       (ok true))
-    err-not-found))
+    err-not-found)))
 
 ;; Deactivate a study group (only creator can do this)
 (define-public (deactivate-group (group-id uint))
-  (match (map-get? study-groups { group-id: group-id })
+  (begin
+    (asserts! (> group-id u0) err-invalid-input)
+    (match (map-get? study-groups { group-id: group-id })
     group-data
     (begin
       (asserts! (is-eq tx-sender (get creator group-data)) err-unauthorized)
@@ -228,7 +239,7 @@
         (merge group-data { is-active: false }))
       
       (ok true))
-    err-not-found))
+    err-not-found)))
 
 ;; Read-only functions
 (define-read-only (get-study-group (group-id uint))
