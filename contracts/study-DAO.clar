@@ -189,6 +189,7 @@
   (begin
     (asserts! (> group-id u0) err-invalid-input)
     (asserts! (> new-score u0) err-invalid-input)
+    (asserts! (not (is-eq member 'SP000000000000000000002Q6VF78)) err-invalid-input) ;; Check for valid principal
     (match (map-get? study-groups { group-id: group-id })
     group-data
     (begin
