@@ -205,7 +205,7 @@
   (match (map-get? study-groups { group-id: group-id })
     group-data
     (begin
-      (asserts! (map-get? group-members { group-id: group-id, member: tx-sender }) err-not-found)
+      (asserts! (is-some (map-get? group-members { group-id: group-id, member: tx-sender })) err-not-found)
       (asserts! (not (is-eq tx-sender (get creator group-data))) err-unauthorized)
       
       (map-delete group-members { group-id: group-id, member: tx-sender })
