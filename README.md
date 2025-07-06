@@ -40,3 +40,4 @@ A decentralized autonomous organization (DAO) platform for managing study groups
 ```bash
 clarinet check
 clarinet test
+```
